@@ -25,8 +25,7 @@
 </body>
 
 <script>
-  const headers = { Authorization: `Bearer ${token}` }
-  const entryPoint = `https://rtc.live.cloudflare.com/v1/apps/${appID}`
+  const API_SERVER = "https://web-share.pages.dev/api"
 
   const localStatus = document.getElementById("localStatus")
   const remoteStatus = document.getElementById("remoteStatus")
@@ -102,8 +101,6 @@
       .catch(() => {
         localStatus.innerText = "Connection timed out!"
       })
-
-    copyTracks = transceivers.map(({ sender }) => (sender.track?.id))
   })
 
   document.getElementById("connect").addEventListener("click", async () => {
@@ -180,17 +177,7 @@
 
 
   async function createPeerConnection() {
-    const turnConfig = await fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${turnID}/credentials/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${turnToken}`,
-          "Content-Type": `application/json`
-        },
-        body: JSON.stringify({
-          "ttl": 86400
-        })
-      }).then(res => { return res.json() })
+    const turnConfig = await fetch(`${API_SERVER}/get_turn_server`).then(res => { return res.json() })
 
     const RTCconfig = {
       iceServers: [
@@ -205,27 +192,21 @@
     console.log(`New PeerConn Config:`, RTCconfig)
     console.log(`New PeerConn:`, peerConnection)
     peerConnection.addEventListener("icecandidateerror", (e) => {
-      console.log("Error PeerConn",e)
+      console.log("Error PeerConn", e)
     })
     return peerConnection;
   }
 
   async function newSession() {
-    const sessionResponse = await fetch(`${entryPoint}/sessions/new`,
-      {
-        method: "POST",
-        headers,
-      },
-    ).then((res) => res.json());
+    const sessionResponse = await fetch(`${API_SERVER}/new_session`).then((res) => res.json());
     console.log(`New Session:`, sessionResponse)
     return sessionResponse.sessionId;
   }
 
   async function newTrack(sessionID, body) {
-    const trackResponse = await fetch(`${entryPoint}/sessions/${sessionID}/tracks/new`,
+    const trackResponse = await fetch(`${API_SERVER}/new_tracks/${sessionID}`,
       {
         method: "POST",
-        headers,
         body: JSON.stringify(body)
       },
     ).then((res) => res.json());
