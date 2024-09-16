@@ -15,45 +15,45 @@
 <body>
   <video id="preview"></video><br>
   <button id="new">New</button>
-  <span id="status"></span>
+  <span id="stat"></span>
   <input type="text" id="shareURL" placeholder="share URL" readonly><br>
 </body>
 
 <script src="./assets/api.js"></script>
 <script src="./assets/remote.js"></script>
 <script>
-  const status = document.getElementById("status")
+  const stat = document.getElementById("stat")
 
   document.getElementById("new").addEventListener("click", async () => {
     // Get media stream
-    status.innerText = "Wait user select media"
+    stat.innerText = "Wait user select media"
     const media = await navigator.mediaDevices.getDisplayMedia({
       audio: true,
       video: true
     })
     // Local preview
-    status.innerText = "Create local preview"
+    stat.innerText = "Create local preview"
     document.getElementById("preview").srcObject = media
     document.getElementById("preview").play()
     // "Create a New Session" request
-    status.innerText = "Create session"
+    stat.innerText = "Create session"
     const sessionID = await newSession()
     // Create "local WevRTC" connection
-    status.innerText = "Connecting session"
+    stat.innerText = "Connecting session"
     const connection = await createPeerConnection()
     // Set transceiver
-    status.innerText = "Setting transceivers"
+    stat.innerText = "Setting transceivers"
     const transceivers = media.getTracks().map((track) =>
       connection.addTransceiver(track, {
         direction: "sendonly",
       }),
     );
     // Create "local WevRTC" offer
-    status.innerText = "Sending transfer config"
+    stat.innerText = "Sending transfer config"
     const localOffer = await connection.createOffer()
     await connection.setLocalDescription(localOffer)
     // Push track request
-    status.innerText = "Sending push tracks"
+    stat.innerText = "Sending push tracks"
     const pushTracks = await newTrack(sessionID, {
       sessionDescription: {
         sdp: localOffer.sdp,
@@ -68,7 +68,7 @@
     // Set "remote WebRTC" description
     await connection.setRemoteDescription(new RTCSessionDescription(pushTracks.sessionDescription))
     // Send Information
-    status.innerText = "Waiting connect"
+    stat.innerText = "Waiting connect"
     const iceConnected = new Promise((resolve, reject) => {
       // timeout after 5s
       setTimeout(reject, 5000);
@@ -84,13 +84,13 @@
 
     await iceConnected
       .then(() => {
-        status.innerText = "Success share \"sessionID\""
+        stat.innerText = "Success share \"sessionID\""
         const accessURL = new URL(window.location.href)
         accessURL.searchParams.set("id",sessionID)
         document.getElementById("sessionID").value = accessURL
       })
       .catch(() => {
-        status.innerText = "Connection timed out!"
+        stat.innerText = "Connection timed out!"
       })
   })
 
