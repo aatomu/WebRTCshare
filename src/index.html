@@ -112,7 +112,7 @@
     const connection = await createPeerConnection()
     // Pull tracks request
     remoteStatus.innerText = "Sending pull tracks"
-    const pullResponse = await pullTrack(sessionID,fromSession.value)
+    const pullResponse = await pullTrack(sessionID, fromSession.value)
     // Track resolve check
     const resolveTracks = Promise.all(
       pullResponse.tracks.map(({ mid }) =>
@@ -137,7 +137,7 @@
       await connection.setLocalDescription(remoteAnswer)
       // Send our answer back to the Calls API
       remoteStatus.innerText = "Sending renegotiation config"
-      const renegotiateResponse = await renegotiateSession(sessionID,remoteAnswer)
+      const renegotiateResponse = await renegotiateSession(sessionID, remoteAnswer)
       if (renegotiateResponse.errorCode) {
         remoteStatus.innerText = "Error: failed send renegotiation config"
         throw new Error(renegotiateResponse.errorDescription)
@@ -188,33 +188,37 @@
     const trackResponse = await fetch(`${API_SERVER}/new_tracks?id=${sessionID}`,
       {
         method: "POST",
-        body: JSON.stringify(body)
+        headers: {
+          "Content-Type": "application/json"
+        },
       },
     ).then((res) => res.json());
     console.log(`New Tracks:`, trackResponse)
     return trackResponse;
   }
 
-  async function pullTrack(sessionID,sourceID) {
+  async function pullTrack(sessionID, sourceID) {
     const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`).then((res) => res.json());
     console.log(`New Tracks:`, trackResponse)
     return trackResponse;
   }
 
-  async function renegotiateSession(sessionID,remoteAnswer) {
+  async function renegotiateSession(sessionID, remoteAnswer) {
     const renegotiateResponse = await fetch(`${API_SERVER}/renegotiate_session?id=${sessionID}`,
-        {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            sessionDescription: {
-              sdp: remoteAnswer.sdp,
-              type: "answer",
-            },
-          }),
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
         },
-      ).then((res) => res.json())
-      console.log(`Renegotiate Session:`, renegotiateResponse)
+        body: JSON.stringify({
+          sessionDescription: {
+            sdp: remoteAnswer.sdp,
+            type: "answer",
+          },
+        }),
+      },
+    ).then((res) => res.json())
+    console.log(`Renegotiate Session:`, renegotiateResponse)
     return renegotiateResponse;
   }
 </script>
