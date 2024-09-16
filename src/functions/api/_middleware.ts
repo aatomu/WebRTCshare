@@ -60,6 +60,26 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         body: request.body,
       });
     }
+    case "pull_tracks": {
+      if (request.method != "GET") return new Response("400 Bad Request", { status: 400 });
+      // Cache tracks
+      const tracks = await caches.default.match(new Request(`https://example.com/cache/${SESSION_ID}`)).then((res) => {
+        return res?.json() as unknown as string[];
+      });
+      const pullTracks = tracks.map((track) => ({
+        location: "remote",
+        trackName: track,
+        sessionId: SESSION_ID,
+      }));
+
+      return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
+        method: "POST",
+        headers: API_HEADER,
+        body: JSON.stringify({
+          tracks: pullTracks,
+        }),
+      });
+    }
     case "get_turn_server": {
       if (request.method != "GET") return new Response("400 Bad Request", { status: 400 });
       return fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${context.env.turnID}/credentials/generate`, {
