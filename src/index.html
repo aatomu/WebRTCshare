@@ -28,10 +28,11 @@
   })
 
 
-  document.addEventListener("load", async () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams((new URL(window.location.href)).searchParams)
     const sourceID = params.get("id")
-    if (sourceID == "") return
-    newPullSession(sourceID)
+    if (sourceID != "") {
+      newPullSession(sourceID)
+    }
   })
 </script>
