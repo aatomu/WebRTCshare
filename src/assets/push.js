@@ -61,7 +61,7 @@ async function newPushSession() {
 
   await iceConnected
     .then(() => {
-      stat.innerText = "Success share \"sessionID\""
+      stat.innerText = "Success: share URL"
       const accessURL = new URL(window.location.href)
       accessURL.searchParams.set("id", sessionID)
       document.getElementById("shareURL").value = accessURL.href
