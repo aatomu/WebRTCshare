@@ -53,7 +53,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Cache tracks
       const data: TracksRequest = await request.clone().json();
       const tracks = data.tracks.map((track) => track.trackName);
-      await caches.default.put(new Request(`https://example.com/cache/${SESSION_ID}`), new Response(JSON.stringify(tracks)));
+      const cacheResponse = new Response(JSON.stringify(tracks))
+      cacheResponse.headers.append("Cache-Control","public, max-age=604800")
+      await caches.default.put(new Request(`https://example.com/cache/${SESSION_ID}`), cacheResponse);
 
       return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
         method: "POST",
