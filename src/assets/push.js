@@ -10,8 +10,6 @@ async function newPushSession() {
   stat.innerText = "Create local preview"
   const preview = document.getElementById("preview")
   preview.srcObject = media
-  preview.play()
-  preview.setAttribute("muted", true)
   // "Create a New Session" request
   stat.innerText = "Create session"
   const sessionID = await newSession()

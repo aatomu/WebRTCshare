@@ -13,7 +13,7 @@
 </style>
 
 <body>
-  <video id="preview"></video><br>
+  <video id="preview" muted autoplay></video><br>
   <button id="new">New</button>
   <span id="stat"></span>
   <input type="text" id="shareURL" placeholder="share URL" readonly><br>
@@ -23,15 +23,21 @@
 <script src="./assets/push.js"></script>
 <script src="./assets/pull.js"></script>
 <script>
+  const preview = document.getElementById("preview")
+  preview.addEventListener("click", () => {
+    if (preview.hasAttribute("muted")) {
+      preview.removeAttribute("muted")
+    } else {
+      preview.setAttribute("muted", true)
+    }
+  })
   document.getElementById("new").addEventListener("click", () => {
     newPushSession()
   })
 
-
   document.addEventListener("DOMContentLoaded", async () => {
-    const params = new URLSearchParams((new URL(window.location.href)).searchParams)
-    const sourceID = params.get("id")
-    if (sourceID != "") {
+    const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
+    if (!sourceID) {
       newPullSession(sourceID)
     }
   })

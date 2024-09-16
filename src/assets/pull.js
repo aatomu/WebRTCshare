@@ -47,7 +47,6 @@ async function newPullSession(sourceID) {
   const stream = new MediaStream();
   const preview = document.getElementById("preview")
   preview.srcObject = stream
-  preview.play()
   pulledTracks.forEach((t) => stream.addTrack(t));
 
   stat.innerText = "Complete!"
