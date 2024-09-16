@@ -3,7 +3,7 @@ interface Env {
   token: string;
   turnID: string;
   turnToken: string;
-  KV:KVNamespace;
+  KV: KVNamespace;
 }
 
 type SessionDescription = {
@@ -49,12 +49,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Cache tracks
       const data: TracksRequest = await request.clone().json();
       const tracks = data.tracks.map((track) => track.trackName);
-      context.env.KV.put(SESSION_ID,JSON.stringify(tracks),{
-        expirationTtl:3600
-      })
-      // const cacheResponse = new Response(JSON.stringify(tracks))
-      // cacheResponse.headers.append("Cache-Control","public, max-age=604800")
-      // await caches.default.put(new Request(`https://example.com/cache/${SESSION_ID}`), cacheResponse);
+      context.env.KV.put(SESSION_ID, JSON.stringify(tracks), {
+        expirationTtl: 600,
+      });
 
       return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
         method: "POST",
@@ -67,9 +64,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Cache tracks
       const SESSION_ID = query.get("id");
       const SOURCE_ID = query.get("source");
-      const tracks = await caches.default.match(new Request(`https://example.com/cache/${SOURCE_ID}`)).then((res) => {
-        return res?.json() as unknown as string[];
-      });
+      let cache = await context.env.KV.get(SOURCE_ID);
+      const tracks = JSON.parse(cache ? cache : "[]");
       const pullTracks = tracks.map((track) => ({
         location: "remote",
         trackName: track,
