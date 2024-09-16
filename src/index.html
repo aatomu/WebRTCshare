@@ -87,7 +87,7 @@
         stat.innerText = "Success share \"sessionID\""
         const accessURL = new URL(window.location.href)
         accessURL.searchParams.set("id",sessionID)
-        document.getElementById("sessionID").value = accessURL.href
+        document.getElementById("shareURL").value = accessURL.href
       })
       .catch((e) => {
         console.log("Error iceConneced:",e)
