@@ -25,7 +25,7 @@
   const preview = document.getElementById("preview")
   preview.addEventListener("click", () => {
     preview.muted = !preview.muted
-    document.getElementById("mute") = !preview.muted
+    document.getElementById("mute").innerText = !preview.muted
   })
   document.getElementById("new").addEventListener("click", () => {
     newPushSession()
