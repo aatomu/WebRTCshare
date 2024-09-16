@@ -37,7 +37,7 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
-    if (!sourceID) {
+    if (sourceID) {
       newPullSession(sourceID)
     }
   })
