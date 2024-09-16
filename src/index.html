@@ -25,11 +25,7 @@
 <script>
   const preview = document.getElementById("preview")
   preview.addEventListener("click", () => {
-    if (preview.hasAttribute("muted")) {
-      preview.removeAttribute("muted")
-    } else {
-      preview.setAttribute("muted", true)
-    }
+    preview.muted = !preview.muted
   })
   document.getElementById("new").addEventListener("click", () => {
     newPushSession()
