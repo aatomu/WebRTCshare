@@ -112,7 +112,7 @@
     const connection = await createPeerConnection()
     // Pull tracks request
     remoteStatus.innerText = "Sending pull tracks"
-    const pullResponse = await pullTrack(sessionID)
+    const pullResponse = await pullTrack(sessionID,fromSession.value)
     // Track resolve check
     const resolveTracks = Promise.all(
       pullResponse.tracks.map(({ mid }) =>
@@ -196,7 +196,7 @@
   }
 
   async function newTrack(sessionID, body) {
-    const trackResponse = await fetch(`${API_SERVER}/new_tracks/${sessionID}`,
+    const trackResponse = await fetch(`${API_SERVER}/new_tracks?id=${sessionID}`,
       {
         method: "POST",
         body: JSON.stringify(body)
@@ -206,8 +206,8 @@
     return trackResponse;
   }
 
-  async function pullTrack(sessionID) {
-    const trackResponse = await fetch(`${API_SERVER}/pull_tracks/${sessionID}`).then((res) => res.json());
+  async function pullTrack(sessionID,sourceID) {
+    const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`).then((res) => res.json());
     console.log(`New Tracks:`, trackResponse)
     return trackResponse;
   }

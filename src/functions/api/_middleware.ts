@@ -30,7 +30,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const request: Request = context.request;
   const REQUEST_PATH = new URL(request.url).pathname.split("/");
   const REQUEST_API = REQUEST_PATH[2];
-  const SESSION_ID = REQUEST_PATH[3];
+  const query = new URLSearchParams(new URL(request.url).searchParams)
   console.log(`PATH: ${REQUEST_PATH}`);
   console.log(`ID: ${context.env.appID}`);
 
@@ -49,6 +49,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
     case "new_tracks": {
       if (request.method != "POST") return new Response("400 Bad Request", { status: 400 });
+      const SESSION_ID = query.get("id")
       // Cache tracks
       const data: TracksRequest = await request.clone().json();
       const tracks = data.tracks.map((track) => track.trackName);
@@ -63,13 +64,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     case "pull_tracks": {
       if (request.method != "GET") return new Response("400 Bad Request", { status: 400 });
       // Cache tracks
+      const SESSION_ID = query.get("id")
+      const SOURCE_ID = query.get("source")
       const tracks = await caches.default.match(new Request(`https://example.com/cache/${SESSION_ID}`)).then((res) => {
         return res?.json() as unknown as string[];
       });
       const pullTracks = tracks.map((track) => ({
         location: "remote",
         trackName: track,
-        sessionId: SESSION_ID,
+        sessionId: SOURCE_ID,
       }));
 
       return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
