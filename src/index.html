@@ -137,18 +137,7 @@
       await connection.setLocalDescription(remoteAnswer)
       // Send our answer back to the Calls API
       remoteStatus.innerText = "Sending renegotiation config"
-      const renegotiateResponse = await fetch(`${entryPoint}/sessions/${sessionID}/renegotiate`,
-        {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            sessionDescription: {
-              sdp: remoteAnswer.sdp,
-              type: "answer",
-            },
-          }),
-        },
-      ).then((res) => res.json())
+      const renegotiateResponse = await renegotiateSession(sessionID,remoteAnswer)
       if (renegotiateResponse.errorCode) {
         remoteStatus.innerText = "Error: failed send renegotiation config"
         throw new Error(renegotiateResponse.errorDescription)
@@ -212,4 +201,20 @@
     return trackResponse;
   }
 
+  async function renegotiateSession(sessionID,remoteAnswer) {
+    const renegotiateResponse = await fetch(`${API_SERVER}/renegotiate_session?id=${sessionID}`,
+        {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({
+            sessionDescription: {
+              sdp: remoteAnswer.sdp,
+              type: "answer",
+            },
+          }),
+        },
+      ).then((res) => res.json())
+      console.log(`Renegotiate Session:`, renegotiateResponse)
+    return renegotiateResponse;
+  }
 </script>
