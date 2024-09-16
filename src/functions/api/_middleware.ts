@@ -3,6 +3,7 @@ interface Env {
   token: string;
   turnID: string;
   turnToken: string;
+  KV:KVNamespace;
 }
 
 type SessionDescription = {
@@ -48,9 +49,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Cache tracks
       const data: TracksRequest = await request.clone().json();
       const tracks = data.tracks.map((track) => track.trackName);
-      const cacheResponse = new Response(JSON.stringify(tracks))
-      cacheResponse.headers.append("Cache-Control","public, max-age=604800")
-      await caches.default.put(new Request(`https://example.com/cache/${SESSION_ID}`), cacheResponse);
+      context.env.KV.put(SESSION_ID,JSON.stringify(tracks),{
+        expirationTtl:3600
+      })
+      // const cacheResponse = new Response(JSON.stringify(tracks))
+      // cacheResponse.headers.append("Cache-Control","public, max-age=604800")
+      // await caches.default.put(new Request(`https://example.com/cache/${SESSION_ID}`), cacheResponse);
 
       return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
         method: "POST",
