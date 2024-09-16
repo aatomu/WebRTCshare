@@ -66,7 +66,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Cache tracks
       const SESSION_ID = query.get("id")
       const SOURCE_ID = query.get("source")
-      const tracks = await caches.default.match(new Request(`https://example.com/cache/${SESSION_ID}`)).then((res) => {
+      const tracks = await caches.default.match(new Request(`https://example.com/cache/${SOURCE_ID}`)).then((res) => {
         return res?.json() as unknown as string[];
       });
       const pullTracks = tracks.map((track) => ({
