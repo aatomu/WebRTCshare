@@ -13,58 +13,47 @@
 </style>
 
 <body>
-  <video id="local" muted></video>
+  <video id="preview"></video><br>
   <button id="new">New</button>
-  <span id="localStatus"></span>
-  <input type="text" id="sessionID" placeholder="SessionID" readonly><br>
-
-  <video id="remote" muted></video>
-  <button id="connect">Connect</button>
-  <span id="remoteStatus"></span>
-  <input type="text" id="fromSession" placeholder="SessionID">
+  <span id="status"></span>
+  <input type="text" id="shareURL" placeholder="share URL" readonly><br>
 </body>
 
+<script src="./assets/api.js"></script>
+<script src="./assets/remote.js"></script>
 <script>
-  const API_SERVER = "https://web-share.pages.dev/api"
-
-  const localStatus = document.getElementById("localStatus")
-  const remoteStatus = document.getElementById("remoteStatus")
-
-  const fromSession = document.getElementById("fromSession")
-  let copyTracks = []
-
-
+  const status = document.getElementById("status")
 
   document.getElementById("new").addEventListener("click", async () => {
     // Get media stream
-    localStatus.innerText = "Wait user select media"
+    status.innerText = "Wait user select media"
     const media = await navigator.mediaDevices.getDisplayMedia({
       audio: true,
       video: true
     })
     // Local preview
-    localStatus.innerText = "Create local preview"
+    status.innerText = "Create local preview"
     document.getElementById("local").srcObject = media
     document.getElementById("local").play()
     // "Create a New Session" request
-    localStatus.innerText = "Create session"
+    status.innerText = "Create session"
     const sessionID = await newSession()
     // Create "local WevRTC" connection
-    localStatus.innerText = "Connecting session"
+    status.innerText = "Connecting session"
     const connection = await createPeerConnection()
     // Set transceiver
-    localStatus.innerText = "Setting transceivers"
+    status.innerText = "Setting transceivers"
     const transceivers = media.getTracks().map((track) =>
       connection.addTransceiver(track, {
         direction: "sendonly",
       }),
     );
     // Create "local WevRTC" offer
-    localStatus.innerText = "Sending transfer config"
+    status.innerText = "Sending transfer config"
     const localOffer = await connection.createOffer()
     await connection.setLocalDescription(localOffer)
     // Push track request
-    localStatus.innerText = "Sending push tracks"
+    status.innerText = "Sending push tracks"
     const pushTracks = await newTrack(sessionID, {
       sessionDescription: {
         sdp: localOffer.sdp,
@@ -79,7 +68,7 @@
     // Set "remote WebRTC" description
     await connection.setRemoteDescription(new RTCSessionDescription(pushTracks.sessionDescription))
     // Send Information
-    localStatus.innerText = "Waiting connect"
+    status.innerText = "Waiting connect"
     const iceConnected = new Promise((resolve, reject) => {
       // timeout after 5s
       setTimeout(reject, 5000);
@@ -95,131 +84,21 @@
 
     await iceConnected
       .then(() => {
-        localStatus.innerText = "Success share \"sessionID\""
-        document.getElementById("sessionID").value = sessionID
+        status.innerText = "Success share \"sessionID\""
+        const accessURL = new URL(window.location.href)
+        accessURL.searchParams.set("id",sessionID)
+        document.getElementById("sessionID").value = accessURL
       })
       .catch(() => {
-        localStatus.innerText = "Connection timed out!"
+        status.innerText = "Connection timed out!"
       })
   })
 
-  document.getElementById("connect").addEventListener("click", async () => {
-    // "Create a New Session" request
-    remoteStatus.innerText = "Create session"
-    const sessionID = await newSession()
-    // Create "local WevRTC" connection
-    remoteStatus.innerText = "Connecting session"
-    const connection = await createPeerConnection()
-    // Pull tracks request
-    remoteStatus.innerText = "Sending pull tracks"
-    const pullResponse = await pullTrack(sessionID, fromSession.value)
-    // Track resolve check
-    const resolveTracks = Promise.all(
-      pullResponse.tracks.map(({ mid }) =>
-        new Promise((resolve, reject) => {
-          setTimeout(reject, 5000)
-          function checkTrack({ transceiver, track }) {
-            if (transceiver.mid !== mid) return
-            connection.removeEventListener("track", checkTrack)
-            resolve(track)
-          }
-          connection.addEventListener("track", checkTrack)
-        })
-      )
-    )
-    // Renegotiation WebRTC
-    if (pullResponse.requiresImmediateRenegotiation) {
-      remoteStatus.innerText = "Renegotiation connection"
-      await connection.setRemoteDescription(pullResponse.sessionDescription)
-      // Create an answer
-      const remoteAnswer = await connection.createAnswer()
-      // And set it as local description
-      await connection.setLocalDescription(remoteAnswer)
-      // Send our answer back to the Calls API
-      remoteStatus.innerText = "Sending renegotiation config"
-      const renegotiateResponse = await renegotiateSession(sessionID, remoteAnswer)
-      if (renegotiateResponse.errorCode) {
-        remoteStatus.innerText = "Error: failed send renegotiation config"
-        throw new Error(renegotiateResponse.errorDescription)
-      }
-    }
-    // Wait pull Tracks
-    remoteStatus.innerText = "Wait pull tracks"
-    const pulledTracks = await resolveTracks;
-    // Remote Preview
-    remoteStatus.innerText = "Create remote preview"
-    const stream = new MediaStream();
-    document.getElementById("remote").srcObject = stream
-    document.getElementById("remote").play()
-    pulledTracks.forEach((t) => stream.addTrack(t));
 
-    remoteStatus.innerText = "Complete!"
+  document.addEventListener("load", async () => {
+    const params = new URLSearchParams((new URL(window.location.href)).searchParams)
+    const sourceID = params.get("id")
+    if (sourceID=="") return
+    connectRemote(sourceID)
   })
-
-
-  async function createPeerConnection() {
-    const turnConfig = await fetch(`${API_SERVER}/get_turn_server`).then(res => { return res.json() })
-
-    const RTCconfig = {
-      iceServers: [
-        {
-          urls: "stun:stun.cloudflare.com:3478",
-        },
-        turnConfig.iceServers
-      ],
-      bundlePolicy: "max-bundle"
-    }
-    const peerConnection = new RTCPeerConnection(RTCconfig);
-    console.log(`New PeerConn Config:`, RTCconfig)
-    console.log(`New PeerConn:`, peerConnection)
-    peerConnection.addEventListener("icecandidateerror", (e) => {
-      console.log("Error PeerConn", e)
-    })
-    return peerConnection;
-  }
-
-  async function newSession() {
-    const sessionResponse = await fetch(`${API_SERVER}/new_session`).then((res) => res.json());
-    console.log(`New Session:`, sessionResponse)
-    return sessionResponse.sessionId;
-  }
-
-  async function newTrack(sessionID, body) {
-    const trackResponse = await fetch(`${API_SERVER}/new_tracks?id=${sessionID}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      },
-    ).then((res) => res.json());
-    console.log(`New Tracks:`, trackResponse)
-    return trackResponse;
-  }
-
-  async function pullTrack(sessionID, sourceID) {
-    const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`).then((res) => res.json());
-    console.log(`New Tracks:`, trackResponse)
-    return trackResponse;
-  }
-
-  async function renegotiateSession(sessionID, remoteAnswer) {
-    const renegotiateResponse = await fetch(`${API_SERVER}/renegotiate_session?id=${sessionID}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          sessionDescription: {
-            sdp: remoteAnswer.sdp,
-            type: "answer",
-          },
-        }),
-      },
-    ).then((res) => res.json())
-    console.log(`Renegotiate Session:`, renegotiateResponse)
-    return renegotiateResponse;
-  }
 </script>
