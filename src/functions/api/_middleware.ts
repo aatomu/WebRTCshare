@@ -21,11 +21,6 @@ type TrackObject = {
   trackName: string;
 };
 
-type NewSessionResponse = {
-  sessionDescription: SessionDescription;
-  sessionId: string;
-};
-
 export const onRequest: PagesFunction<Env> = async (context) => {
   const request: Request = context.request;
   const REQUEST_PATH = new URL(request.url).pathname.split("/");
