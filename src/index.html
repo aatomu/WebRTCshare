@@ -87,9 +87,10 @@
         stat.innerText = "Success share \"sessionID\""
         const accessURL = new URL(window.location.href)
         accessURL.searchParams.set("id",sessionID)
-        document.getElementById("sessionID").value = accessURL
+        document.getElementById("sessionID").value = accessURL.href
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log("Error iceConneced:",e)
         stat.innerText = "Connection timed out!"
       })
   })
