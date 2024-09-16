@@ -23,13 +23,15 @@
 <script src="./assets/push.js"></script>
 <script src="./assets/pull.js"></script>
 <script>
-  document.getElementById("new").addEventListener("click",newPushSession())
+  document.getElementById("new").addEventListener("click", () => {
+    newPushSession()
+  })
 
 
   document.addEventListener("load", async () => {
     const params = new URLSearchParams((new URL(window.location.href)).searchParams)
     const sourceID = params.get("id")
-    if (sourceID=="") return
+    if (sourceID == "") return
     newPullSession(sourceID)
   })
 </script>
