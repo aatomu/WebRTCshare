@@ -20,86 +20,16 @@
 </body>
 
 <script src="./assets/api.js"></script>
-<script src="./assets/remote.js"></script>
+<script src="./assets/push.js"></script>
+<script src="./assets/pull.js"></script>
 <script>
-  const stat = document.getElementById("stat")
-
-  document.getElementById("new").addEventListener("click", async () => {
-    // Get media stream
-    stat.innerText = "Wait user select media"
-    const media = await navigator.mediaDevices.getDisplayMedia({
-      audio: true,
-      video: true
-    })
-    // Local preview
-    stat.innerText = "Create local preview"
-    document.getElementById("preview").srcObject = media
-    document.getElementById("preview").play()
-    // "Create a New Session" request
-    stat.innerText = "Create session"
-    const sessionID = await newSession()
-    // Create "local WevRTC" connection
-    stat.innerText = "Connecting session"
-    const connection = await createPeerConnection()
-    // Set transceiver
-    stat.innerText = "Setting transceivers"
-    const transceivers = media.getTracks().map((track) =>
-      connection.addTransceiver(track, {
-        direction: "sendonly",
-      }),
-    );
-    // Create "local WevRTC" offer
-    stat.innerText = "Sending transfer config"
-    const localOffer = await connection.createOffer()
-    await connection.setLocalDescription(localOffer)
-    // Push track request
-    stat.innerText = "Sending push tracks"
-    const pushTracks = await newTrack(sessionID, {
-      sessionDescription: {
-        sdp: localOffer.sdp,
-        type: "offer",
-      },
-      tracks: transceivers.map(({ mid, sender }) => ({
-        location: "local",
-        mid,
-        trackName: sender.track?.id,
-      })),
-    })
-    // Set "remote WebRTC" description
-    await connection.setRemoteDescription(new RTCSessionDescription(pushTracks.sessionDescription))
-    // Send Information
-    stat.innerText = "Waiting connect"
-    const iceConnected = new Promise((resolve, reject) => {
-      // timeout after 5s
-      setTimeout(reject, 5000);
-
-      function checkState() {
-        if (connection.iceConnectionState === "connected") {
-          connection.removeEventListener("iceconnectionstatechange", checkState)
-          resolve(null);
-        }
-      }
-      connection.addEventListener("iceconnectionstatechange", checkState)
-    })
-
-    await iceConnected
-      .then(() => {
-        stat.innerText = "Success share \"sessionID\""
-        const accessURL = new URL(window.location.href)
-        accessURL.searchParams.set("id",sessionID)
-        document.getElementById("shareURL").value = accessURL.href
-      })
-      .catch((e) => {
-        console.log("Error iceConneced:",e)
-        stat.innerText = "Connection timed out!"
-      })
-  })
+  document.getElementById("new").addEventListener("click",newPushSession())
 
 
   document.addEventListener("load", async () => {
     const params = new URLSearchParams((new URL(window.location.href)).searchParams)
     const sourceID = params.get("id")
     if (sourceID=="") return
-    connectRemote(sourceID)
+    newPullSession(sourceID)
   })
 </script>

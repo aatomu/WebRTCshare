@@ -1,4 +1,4 @@
-async function connectRemote(sourceID) {
+async function newPullSession(sourceID) {
       // "Create a New Session" request
       remoteStatus.innerText = "Create session"
       const sessionID = await newSession()
@@ -7,7 +7,7 @@ async function connectRemote(sourceID) {
       const connection = await createPeerConnection()
       // Pull tracks request
       remoteStatus.innerText = "Sending pull tracks"
-      const pullResponse = await pullTrack(sessionID, fromSession.value)
+      const pullResponse = await pullTrack(sessionID, sourceID)
       // Track resolve check
       const resolveTracks = Promise.all(
         pullResponse.tracks.map(({ mid }) =>
