@@ -14,9 +14,8 @@
 
 <body>
   <video id="preview" muted autoplay></video><br>
-  <button id="new">New</button>
-  <span id="stat"></span>
-  <input type="text" id="shareURL" placeholder="share URL" readonly><br>
+  <button id="new">New</button><span id="stat"></span><br>
+  <input type="text" id="shareURL" placeholder="share URL" readonly><span id="mute">Video Mute: true</span><br>
 </body>
 
 <script src="./assets/api.js"></script>
@@ -26,6 +25,7 @@
   const preview = document.getElementById("preview")
   preview.addEventListener("click", () => {
     preview.muted = !preview.muted
+    document.getElementById("mute") = !preview.muted
   })
   document.getElementById("new").addEventListener("click", () => {
     newPushSession()
