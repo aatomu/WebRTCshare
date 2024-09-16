@@ -10,12 +10,18 @@
     width: 720px;
     background-color: gray;
   }
+
+  .controls {
+    background-color: lightgray;
+  }
 </style>
 
 <body>
   <video id="preview" muted autoplay></video><br>
-  <button id="new">New</button><span id="stat"></span><br>
-  <input type="text" id="shareURL" placeholder="share URL" readonly><span id="mute">Video Mute: true</span><br>
+  <div class="controls">
+    <button id="new">New</button><span id="stat"></span><br>
+    <input type="text" id="shareURL" placeholder="share URL" readonly><span id="mute">Video Mute: true</span><br>
+  </div>
 </body>
 
 <script src="./assets/api.js"></script>
