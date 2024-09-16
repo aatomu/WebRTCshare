@@ -41,7 +41,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   switch (REQUEST_API) {
     case "new_session": {
-      if (request.method != "POST") return new Response("400 Bad Request", { status: 400 });
+      if (request.method != "GET") return new Response("400 Bad Request", { status: 400 });
       return fetch(`${API_BASE}/sessions/new`, {
         method: "POST",
         headers: API_HEADER,
