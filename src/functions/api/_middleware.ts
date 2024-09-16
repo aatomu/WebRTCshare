@@ -11,6 +11,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   //const REQUEST_EntryPoint = REQUEST_PATH[1];
   const REQUEST_SITE = REQUEST_PATH[2];
   const REQUEST_API = REQUEST_PATH[3];
-  console.log(context.env, REQUEST_PATH);
+  console.log(context.env.appID, REQUEST_PATH);
   return new Response("404 Not Found");
 };
