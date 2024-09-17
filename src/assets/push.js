@@ -4,14 +4,21 @@ async function newPushSession() {
   stat.innerText = "Wait user select media"
   const media = await navigator.mediaDevices.getDisplayMedia({
     audio: {
-      channelCount:1,
-      sampleRate:24000
+      autoGainControl: true,
+      channelCount: 1,
+      echoCancellation: false,
+      noiseSuppression: false,
+      sampleRate: 24000,
     },
     video: {
       height: 720,
       width: 1280,
-      frameRate:30
-    }
+      frameRate: 30,
+      suppressLocalAudioPlayback: false,
+    },
+    systemAudio: "include",
+    surfaceSwitching: "include",
+    monitorTypeSurfaces: "include",
   })
   // Local preview
   stat.innerText = "Create local preview"
