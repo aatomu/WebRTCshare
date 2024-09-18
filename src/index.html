@@ -48,14 +48,14 @@
 
   let sessions
   // Push
-  document.getElementById("new").addEventListener("click", () => {
-    sessions = newPushSession()
+  document.getElementById("new").addEventListener("click",async () => {
+    sessions = await newPushSession()
   })
   // Pull
   document.addEventListener("DOMContentLoaded", async () => {
     const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
     if (sourceID) {
-      sessions = newPullSession(sourceID)
+      sessions = await newPullSession(sourceID)
     }
   })
 </script>
