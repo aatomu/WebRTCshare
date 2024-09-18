@@ -45,14 +45,17 @@
     preview.muted = !preview.muted
     document.getElementById("mute").innerText = `Video Mute: ${!preview.muted}`
   })
-  document.getElementById("new").addEventListener("click", () => {
-    newPushSession()
-  })
 
+  let connect
+  // Push
+  document.getElementById("new").addEventListener("click", () => {
+    connect = newPushSession()
+  })
+  // Pull
   document.addEventListener("DOMContentLoaded", async () => {
     const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
     if (sourceID) {
-      newPullSession(sourceID)
+      connect = newPullSession(sourceID)
     }
   })
 </script>

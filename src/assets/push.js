@@ -82,4 +82,7 @@ async function newPushSession() {
       console.log("Error iceConneced:", e)
       stat.innerText = "Connection timed out!"
     })
+
+  // Return peerConnection
+  return connection
 }

@@ -50,4 +50,7 @@ async function newPullSession(sourceID) {
   pulledTracks.forEach((t) => stream.addTrack(t));
 
   stat.innerText = "Complete!"
+
+  // Return peerConnection
+  return connection
 }
