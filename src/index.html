@@ -46,16 +46,16 @@
     document.getElementById("mute").innerText = `Video Mute: ${!preview.muted}`
   })
 
-  let connect
+  let sessions
   // Push
   document.getElementById("new").addEventListener("click", () => {
-    connect = newPushSession()
+    sessions = newPushSession()
   })
   // Pull
   document.addEventListener("DOMContentLoaded", async () => {
     const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
     if (sourceID) {
-      connect = newPullSession(sourceID)
+      sessions = newPullSession(sourceID)
     }
   })
 </script>

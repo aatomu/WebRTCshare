@@ -6,6 +6,7 @@ async function newPullSession(sourceID) {
   // Create "local WevRTC" connection
   stat.innerText = "Connecting session"
   const connection = await createPeerConnection()
+  const dataChannel = connection.createDataChannel("channel");
   // Pull tracks request
   stat.innerText = "Sending pull tracks"
   const pullResponse = await pullTrack(sessionID, sourceID)
@@ -52,5 +53,5 @@ async function newPullSession(sourceID) {
   stat.innerText = "Complete!"
 
   // Return peerConnection
-  return connection
+  return {rtc:connection,channel:dataChannel}
 }

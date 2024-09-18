@@ -30,6 +30,7 @@ async function newPushSession() {
   // Create "local WevRTC" connection
   stat.innerText = "Connecting session"
   const connection = await createPeerConnection()
+  const dataChannel = connection.createDataChannel("channel");
   // Set transceiver
   stat.innerText = "Setting transceivers"
   const transceivers = media.getTracks().map((track) =>
@@ -83,6 +84,6 @@ async function newPushSession() {
       stat.innerText = "Connection timed out!"
     })
 
-  // Return peerConnection
-  return connection
+  // Return connection
+  return {rtc:connection,channel:dataChannel}
 }
