@@ -43,9 +43,9 @@ async function newTrack(sessionID, body) {
 
 async function pullTrack(sessionID, sourceID) {
   const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`)
-    .then((res) => {
+    .then(async(res) => {
       if (!res.ok) {
-        console.log(`Pull Tracks Error:`, e)
+        console.log(`Pull Tracks Error:`, await res.text())
         return null
       }
       return res.json()
