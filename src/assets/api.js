@@ -42,8 +42,13 @@ async function newTrack(sessionID, body) {
 }
 
 async function pullTrack(sessionID, sourceID) {
-  const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`).then((res) => res.json());
-  console.log(`New Tracks:`, trackResponse)
+  const trackResponse = await fetch(`${API_SERVER}/pull_tracks?id=${sessionID}&source=${sourceID}`)
+    .then((res) => res.json())
+    .catch((e) => {
+      console.log(`Pull Tracks Error:`, e)
+      return null
+    });
+  console.log(`Pull Tracks:`, trackResponse)
   return trackResponse;
 }
 

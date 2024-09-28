@@ -8,10 +8,7 @@ async function newPullSession(sourceID) {
   const connection = await createPeerConnection()
   // Pull tracks request
   stat.innerText = "Sending pull tracks"
-  const pullResponse = await pullTrack(sessionID, sourceID).catch((e) => {
-    console.log("Error pull track:", e)
-    return null
-  })
+  const pullResponse = await pullTrack(sessionID, sourceID)
   if (!pullResponse) {
     stat.innerText = "nvalid session"
     return
