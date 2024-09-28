@@ -10,7 +10,7 @@ async function newPullSession(sourceID) {
   stat.innerText = "Sending pull tracks"
   const pullResponse = await pullTrack(sessionID, sourceID)
   if (!pullResponse) {
-    stat.innerText = "nvalid session"
+    stat.innerText = "Invalid session"
     return
   }
   // Track resolve check
