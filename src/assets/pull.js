@@ -9,8 +9,9 @@ async function newPullSession(sourceID) {
   // Pull tracks request
   stat.innerText = "Sending pull tracks"
   const pullResponse = await pullTrack(sessionID, sourceID).catch((e) =>{
-    console.log("Error",e)
+    console.log("Error pull track:",e)
     stat.innerText = "Invalid session"
+    return
   })
   // Track resolve check
   const resolveTracks = Promise.all(
