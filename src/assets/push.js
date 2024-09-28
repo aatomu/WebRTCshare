@@ -84,5 +84,5 @@ async function newPushSession() {
     })
 
   // Return connection
-  return {rtc:connection,channel:dataChannel}
+  return {rtc:connection}
 }

@@ -8,7 +8,10 @@ async function newPullSession(sourceID) {
   const connection = await createPeerConnection()
   // Pull tracks request
   stat.innerText = "Sending pull tracks"
-  const pullResponse = await pullTrack(sessionID, sourceID)
+  const pullResponse = await pullTrack(sessionID, sourceID).catch((e) =>{
+    console.log("Error",e)
+    stat.innerText = "Invalid session"
+  })
   // Track resolve check
   const resolveTracks = Promise.all(
     pullResponse.tracks.map(({ mid }) =>
@@ -52,5 +55,5 @@ async function newPullSession(sourceID) {
   stat.innerText = "Complete!"
 
   // Return peerConnection
-  return { rtc: connection, channel: dataChannel }
+  return { rtc: connection}
 }
