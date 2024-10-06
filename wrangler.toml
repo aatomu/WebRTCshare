@@ -1,0 +1,5 @@
+# wrangler.toml
+name = "web-rtc-share"
+main = "src/index.ts"
+compatibility_date = "2024-09-19"
+assets = { directory = "./assets/", binding = "ASSETS" }
