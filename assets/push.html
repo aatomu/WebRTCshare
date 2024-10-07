@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<head>
+	<meta charset="utf-8">
+	<title id="title">Push - web-rtc-share</title>
+	<meta charset="utf-8">
+	<meta name="theme-color" content="#ff8000">
+
+	<meta property="og:title" content="Push - web-rtc-share" />
+	<meta property="og:site_name" content="create by aatomu" />
+	<meta property="og:description" content="**Simple** screen share host" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:site" content="@aatomu" />
+	<meta name="twitter:creator" content="@aatomu" />
+
+	<link href="/asset/style.css" rel="stylesheet">
+</head>
+
+<body class="flex-column">
+	<video id="preview" muted autoplay></video>
+	<div class="controls">
+		<button id="new">New</button><br>
+		<span id="status">Status: </span><br>
+		<input type="text" id="shareURL" placeholder="share URL" readonly size="60">
+		<div class="support">
+			<span>If you want to fix the id...<span><br>
+					<span>Add ?id=CUSTOM_ID to the URL</span>
+		</div>
+	</div>
+</body>
+
+<script src="./asset/api.js"></script>
+<script src="./asset/push.js"></script>
+<script>
+	let sessions
+	// Push
+	document.getElementById("new").addEventListener("click", async () => {
+		// Get customID
+		const param = new URLSearchParams(new URL(window.location.href).searchParams)
+		let customID = param.get("id")
+		if (!customID) {
+			const source = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+			const arr = new Uint32Array(16)
+			crypto.getRandomValues(arr)
+
+			customID = Array.from(arr).map((v) => source[v % source.length]).join("")
+		}
+
+		sessions = await newPushSession(customID)
+	})
+</script>
