@@ -1,19 +1,124 @@
 // index.ts
-export interface Env {
-  TOKEN: string;
-  PUBLIC_KEY: string;
-  AI: Ai;
-  ASSETS: Fetcher;
+interface Env {
+	appID: string;
+	token: string;
+	turnID: string;
+	turnToken: string;
+	KV: KVNamespace;
+	ASSETS: Fetcher;
 }
 
-const embedError = 0xff0000;
+type SessionDescription = {
+	sdp: string;
+	type: 'answer' | 'offer';
+};
+
+type TracksRequest = {
+	sessionDescription: SessionDescription;
+	tracks: TrackObject[];
+};
+type TrackObject = {
+	type: 'local' | 'remote';
+	mid: string;
+	sessionID: string;
+	trackName: string;
+};
+
+type Session = {
+	tracks: string[];
+	sessionID: string;
+};
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    if (url.pathname.startsWith("/api")) {
-      return new Response(env.PUBLIC_KEY)
-    }
-    return env.ASSETS.fetch(request);
-  },
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		const REQUEST_PATH = new URL(request.url).pathname.split('/');
+		if (REQUEST_PATH[1] != 'api') return new Response('404 Not Found', { status: 404 });
+		const REQUEST_API = REQUEST_PATH[2];
+		const query = new URLSearchParams(new URL(request.url).searchParams);
+		console.log(`PATH: ${REQUEST_PATH}`);
+
+		const API_BASE = `https://rtc.live.cloudflare.com/v1/apps/${env.appID}`;
+		const API_HEADER = {
+			Authorization: `Bearer ${env.token}`,
+		};
+
+		switch (REQUEST_API) {
+			case 'new_session': {
+				if (request.method != 'GET') return new Response('400 Bad Request', { status: 400 });
+
+				return fetch(`${API_BASE}/sessions/new`, {
+					method: 'POST',
+					headers: API_HEADER,
+				});
+			}
+			case 'new_tracks': {
+				if (request.method != 'POST') return new Response('400 Bad Request', { status: 400 });
+
+				const sessionID = query.get('session');
+				const customID = query.get('id');
+				if (!sessionID || !customID) return new Response('400 Bad Request', { status: 400 });
+
+				// Cache session
+				const data: TracksRequest = await request.clone().json();
+				const tracks = data.tracks.map((track) => track.trackName);
+				const session: Session = {
+					tracks: tracks,
+					sessionID: sessionID,
+				};
+				env.KV.put(customID, JSON.stringify(session), {
+					expirationTtl: 600,
+				});
+
+				return fetch(`${API_BASE}/sessions/${sessionID}/tracks/new`, {
+					method: 'POST',
+					headers: API_HEADER,
+					body: request.body,
+				});
+			}
+			case 'pull_tracks': {
+				if (request.method != 'GET') return new Response('400 Bad Request', { status: 400 });
+				// Cache tracks
+				const SESSION_ID = query.get('id');
+				const SOURCE_ID = query.get('source');
+				let cache = await env.KV.get(SOURCE_ID);
+				const tracks = JSON.parse(cache ? cache : '[]');
+				const pullTracks = tracks.map((track) => ({
+					location: 'remote',
+					trackName: track,
+					sessionId: SOURCE_ID,
+				}));
+
+				return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
+					method: 'POST',
+					headers: API_HEADER,
+					body: JSON.stringify({
+						tracks: pullTracks,
+					}),
+				});
+			}
+			case 'renegotiate_session': {
+				if (request.method != 'PUT') return new Response('400 Bad Request', { status: 400 });
+				const SESSION_ID = query.get('id');
+				return fetch(`${API_BASE}/sessions/${SESSION_ID}/renegotiate`, {
+					method: 'PUT',
+					headers: API_HEADER,
+					body: request.body,
+				});
+			}
+			case 'get_turn_server': {
+				if (request.method != 'GET') return new Response('400 Bad Request', { status: 400 });
+				return fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${env.turnID}/credentials/generate`, {
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${env.turnToken}`,
+						'Content-Type': `application/json`,
+					},
+					body: JSON.stringify({
+						ttl: 86400,
+					}),
+				});
+			}
+		}
+		return new Response('404 Not Found');
+	},
 };

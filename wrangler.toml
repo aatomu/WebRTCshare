@@ -1,5 +1,8 @@
-# wrangler.toml
 name = "web-rtc-share"
 main = "src/index.ts"
 compatibility_date = "2024-09-19"
 assets = { directory = "./assets/", binding = "ASSETS" }
+
+[[kv_namespaces]]
+binding = "KV"
+id = "ee6ffc64585145f5a4a1397201e01773"
