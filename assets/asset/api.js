@@ -1,4 +1,6 @@
-const API_SERVER = "https://web-rtc-share.aatomu.workers.dev/api"
+const url = new URL(window.location.origin)
+url.pathname="/api"
+const API_SERVER = url.href
 
 async function createPeerConnection() {
 	const turnConfig = await fetch(`${API_SERVER}/get_turn_server`).then(res => { return res.json() })
