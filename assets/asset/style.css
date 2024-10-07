@@ -2,6 +2,7 @@
 	--white: #FAF7F0;
 	--white-warm: #D8D2C2;
 	--dark: #4A4947;
+--brown: #B17457;
 }
 
 body {
@@ -52,12 +53,21 @@ body>* {
 
 
 video {
+	margin: 1ch;
 	height: 480px;
 	width: 854px;
-	border-radius: 0.5ch;
+
+	border-radius: 1ch;
+	border-width: 5px;
+	border-style: solid;
+	border-color: var(--white);
 
 	background-color: var(--white);
 
+}
+
+video.sound {
+	border-color: var(--brown);
 }
 
 .controls {
@@ -70,4 +80,13 @@ video {
 
 .support {
 	color: var(--white-warm);
+}
+
+.preview-area {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
 }

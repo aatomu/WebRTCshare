@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<head>
+	<meta charset="utf-8">
+	<title id="title">Pull - web-rtc-share</title>
+	<meta charset="utf-8">
+	<meta name="theme-color" content="#ff8000">
+
+	<meta property="og:title" content="Pull - web-rtc-share" />
+	<meta property="og:site_name" content="create by aatomu" />
+	<meta property="og:description" content="**Simple** screen listener" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:site" content="@aatomu" />
+	<meta name="twitter:creator" content="@aatomu" />
+
+	<link href="/asset/style.css" rel="stylesheet">
+</head>
+
+<body class="flex-column">
+	<div id="preview" class="preview-area">
+	</div>
+	<div class="controls">
+		<span id="status"></span><br>
+		<span id="mute">Video Mute: true</span><br>
+		<div class="support">
+			<span>If you want to more screen...</span><br>
+			<span>Set ?id=ID1&id=ID2&id=ID3... to the URL</span><br>
+			<br>
+			<span>Click to enable sound(with outline)</span>
+		</div>
+	</div>
+</body>
+
+<script src="./asset/api.js"></script>
+<script src="./asset/pull.js"></script>
+<script>
+	let sessions = []
+	// Pull
+	document.addEventListener("DOMContentLoaded", async () => {
+		const customIDs = new URLSearchParams((new URL(window.location.href)).searchParams).getAll("id")
+		for (i = 0; i < customIDs.length; i++) {
+			const customID = customIDs[i]
+			sessions.push(await newPullSession(customID))
+		}
+	})
+</script>

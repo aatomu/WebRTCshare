@@ -26,7 +26,7 @@ type TrackObject = {
 
 type Session = {
 	tracks: string[];
-	sessionID: string;
+	sourceID: string;
 };
 
 export default {
@@ -63,7 +63,7 @@ export default {
 				const tracks = data.tracks.map((track) => track.trackName);
 				const session: Session = {
 					tracks: tracks,
-					sessionID: sessionID,
+					sourceID: sessionID,
 				};
 				env.KV.put(customID, JSON.stringify(session), {
 					expirationTtl: 600,
@@ -77,18 +77,24 @@ export default {
 			}
 			case 'pull_tracks': {
 				if (request.method != 'GET') return new Response('400 Bad Request', { status: 400 });
+
+				const sessionID = query.get('session');
+				const customID = query.get('id');
+				if (!sessionID || !customID) return new Response('400 Bad Request', { status: 400 });
+
 				// Cache tracks
-				const SESSION_ID = query.get('id');
-				const SOURCE_ID = query.get('source');
-				let cache = await env.KV.get(SOURCE_ID);
-				const tracks = JSON.parse(cache ? cache : '[]');
-				const pullTracks = tracks.map((track) => ({
+				let cache = await env.KV.get(customID);
+				if (!cache) {
+					return new Response('404 Not Found', { status: 404 });
+				}
+				const session: Session = JSON.parse(cache);
+				const pullTracks = session.tracks.map((track) => ({
 					location: 'remote',
 					trackName: track,
-					sessionId: SOURCE_ID,
+					sessionId: session.sourceID,
 				}));
 
-				return fetch(`${API_BASE}/sessions/${SESSION_ID}/tracks/new`, {
+				return fetch(`${API_BASE}/sessions/${sessionID}/tracks/new`, {
 					method: 'POST',
 					headers: API_HEADER,
 					body: JSON.stringify({
