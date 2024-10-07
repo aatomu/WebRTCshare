@@ -32,13 +32,14 @@ async function newPullSession(customID) {
 	const resolveTracks = Promise.all(
 		pullResponse.tracks.map(({ mid }) =>
 			new Promise((resolve, reject) => {
-				setTimeout(() => {
+				const timeout = setTimeout(() => {
 					setStatus("Pull tracks timed out")
 					reject()
 				}, 5000)
 				function checkTrack({ transceiver, track }) {
 					if (transceiver.mid !== mid) return
 					connection.removeEventListener("track", checkTrack)
+					clearTimeout(timeout)
 					resolve(track)
 				}
 				connection.addEventListener("track", checkTrack)
