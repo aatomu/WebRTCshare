@@ -2,62 +2,31 @@
 
 <head>
 	<meta charset="utf-8">
-	<title id="title">web-share</title>
+	<title id="title">Top - web-rtc-share</title>
 	<meta charset="utf-8">
 	<meta name="theme-color" content="#ff8000">
 
-	<!-- <meta property="og:image" content="https://" /> -->
-	<meta property="og:title" content="web-share" />
+	<meta property="og:title" content="Top - web-rtc-share" />
 	<meta property="og:site_name" content="create by aatomu" />
-	<meta property="og:description" content="Simple screen share service" />
+	<meta property="og:description" content="**Simple** screen share service" />
 
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:site" content="@aatomu" />
 	<meta name="twitter:creator" content="@aatomu" />
+
+	<link href="/asset/style.css" rel="stylesheet">
 </head>
 
-<style>
-	video {
-		height: 720px;
-		width: 1280px;
-		background-color: gray;
-	}
-
-	.controls {
-		background-color: lightgray;
-	}
-</style>
-
-<body>
-	<div class="main">
-		<video id="preview" muted autoplay></video><br>
-		<div class="controls">
-			<button id="new">New</button><span id="stat"></span><br>
-			<input type="text" id="shareURL" placeholder="share URL" readonly><span id="mute">Video Mute: true</span><br>
+<body class="flex-row">
+	<a href="/push" class="top-link">
+		<div class="top-button">
+			<span class="top-link-title">PUSH</span><br>
+			<span class="top-link-description">Screen share host</span>
 		</div>
-	</div>
+	</a>
+	<a href="/pull" class="top-link">
+		<div class="top-button">
+			<span class="top-link-title">PULL</span><br>
+			<span class="top-link-description">Screen listener</span>
+		</div>
 </body>
-
-<script src="./script/api.js"></script>
-<script src="./script/push.js"></script>
-<script src="./script/pull.js"></script>
-<script>
-	const preview = document.getElementById("preview")
-	preview.addEventListener("click", () => {
-		preview.muted = !preview.muted
-		document.getElementById("mute").innerText = `Video Mute: ${!preview.muted}`
-	})
-
-	let sessions
-	// Push
-	document.getElementById("new").addEventListener("click", async () => {
-		sessions = await newPushSession()
-	})
-	// Pull
-	document.addEventListener("DOMContentLoaded", async () => {
-		const sourceID = new URLSearchParams((new URL(window.location.href)).searchParams).get("id")
-		if (sourceID) {
-			sessions = await newPullSession(sourceID)
-		}
-	})
-</script>
