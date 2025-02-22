@@ -66,7 +66,7 @@ export default {
 					sourceID: sessionID,
 				};
 				env.KV.put(customID, JSON.stringify(session), {
-					expirationTtl: 3600,
+					expirationTtl: 60*60*24,
 				});
 
 				return fetch(`${API_BASE}/sessions/${sessionID}/tracks/new`, {
